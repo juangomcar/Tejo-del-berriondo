@@ -14,7 +14,7 @@ export default class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: 'GameScene' });
     this.tejoX = GAME_WIDTH / 2;
-    this.tejoY = GAME_HEIGHT - 100;
+    this.tejoY = GAME_HEIGHT - 150;
     this.lanzado = false;
     this.isDragging = false;
     this.startX = 0;
@@ -85,16 +85,15 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    // Fondo
     this.add.rectangle(GAME_WIDTH/2, GAME_HEIGHT/2, GAME_WIDTH, GAME_HEIGHT, COLORS.background);
 
-    // Paredes del mundo — el tejo no se escapa
-    this.matter.add.rectangle(GAME_WIDTH/2, GAME_HEIGHT-10, GAME_WIDTH, 20, { isStatic: true, label: 'suelo', restitution: 0.4 });
-    this.matter.add.rectangle(10, GAME_HEIGHT/2, 20, GAME_HEIGHT, { isStatic: true });
-    this.matter.add.rectangle(GAME_WIDTH-10, GAME_HEIGHT/2, 20, GAME_HEIGHT, { isStatic: true });
-    this.matter.add.rectangle(GAME_WIDTH/2, 10, GAME_WIDTH, 20, { isStatic: true });
+    // Paredes gruesas para evitar que el tejo se escape
+    this.matter.add.rectangle(GAME_WIDTH/2, GAME_HEIGHT-10, GAME_WIDTH, 20, { isStatic: true, label: 'suelo', restitution: 0.3, friction: 0.8 });
+    this.matter.add.rectangle(25, GAME_HEIGHT/2, 50, GAME_HEIGHT, { isStatic: true, restitution: 0.2, friction: 0.8 });
+    this.matter.add.rectangle(GAME_WIDTH-25, GAME_HEIGHT/2, 50, GAME_HEIGHT, { isStatic: true, restitution: 0.2, friction: 0.8 });
+    this.matter.add.rectangle(GAME_WIDTH/2, 10, GAME_WIDTH, 20, { isStatic: true, restitution: 0, friction: 1 });
 
-    // Tejo
+    // Tejo — solo lo creamos una vez, siempre en la misma posición
     this.tejo = this.matter.add.image(this.tejoX, this.tejoY, 'tejo');
     this.tejo.setCircle(25);
     this.tejo.setStatic(true);
@@ -102,39 +101,42 @@ export default class GameScene extends Phaser.Scene {
     this.tejo.setFrictionAir(PHYSICS.frictionAir);
     this.tejo.setBounce(PHYSICS.restitution);
     this.tejo.body.label = 'tejo';
+    this.tejo.body.inertia = Infinity;
+    this.tejo.body.inverseInertia = 0;
 
-    // Línea de la resortera
+    // Gráfico visual de la resortera — solo visual, no físico
     this.lineaResortera = this.add.graphics();
+    
+    // Punto visual del tejo mientras apunta — separado del físico
+    this.tejoVisual = this.add.circle(this.tejoX, this.tejoY, 25, 0x999999).setDepth(6);
+    this.tejoVisual.setVisible(false);
 
-    // UI — puntos
     this.textoPuntos = this.add.text(20, 30, 'Puntos: 0', {
       fontSize: '28px', color: '#ffffff', fontFamily: 'Arial'
     }).setDepth(10);
 
-    // UI — nivel
     this.textoNivel = this.add.text(GAME_WIDTH-20, 30, 'Nivel 1', {
       fontSize: '22px', color: '#FFD700', fontFamily: 'Arial'
     }).setOrigin(1, 0).setDepth(10);
 
-    // UI — progreso de nivel (estrellas)
     this.textoProgreso = this.add.text(GAME_WIDTH/2, 30, '', {
       fontSize: '18px', color: '#aaaaaa', fontFamily: 'Arial'
     }).setOrigin(0.5, 0).setDepth(10);
 
-    // UI — indicador de viento
     this.textoViento = this.add.text(GAME_WIDTH/2, 70, '', {
       fontSize: '16px', color: '#88ccff', fontFamily: 'Arial'
     }).setOrigin(0.5).setDepth(10);
 
-    // UI — instrucción
     this.textoInstruccion = this.add.text(GAME_WIDTH/2, GAME_HEIGHT-170, 'Arrastra y suelta para lanzar', {
       fontSize: '18px', color: '#aaaaaa', fontFamily: 'Arial'
     }).setOrigin(0.5).setDepth(10);
 
-    // Cargamos el primer nivel
+    this.textoOferta = this.add.text(GAME_WIDTH/2, GAME_HEIGHT - 15, '🎁 ¡Acumula puntos para una oferta!', {
+      fontSize: '13px', color: '#FFD700', fontFamily: 'Arial'
+    }).setOrigin(0.5).setDepth(10);
+
     this.cargarNivel(1);
 
-    // Colisiones
     this.matter.world.on('collisionstart', (event) => {
       event.pairs.forEach(pair => {
         const labels = [pair.bodyA.label, pair.bodyB.label];
@@ -145,19 +147,16 @@ export default class GameScene extends Phaser.Scene {
         }
       });
     });
-    this.events.on('resume', (scene, data) => {
-  if (data && data.tejoEspecial) {
-    this.tejoEspecial = data.tejoEspecial;
-    this.mostrarTejoEspecialActivo();
-  }
-});
 
-    // Input — resortera
     this.input.on('pointerdown', (p) => {
       if (this.lanzado) return;
       this.isDragging = true;
       this.startX = p.worldX;
       this.startY = p.worldY;
+      // Ocultamos el tejo físico y mostramos el visual
+      this.tejo.setVisible(false);
+      this.tejoVisual.setVisible(true);
+      this.tejoVisual.setPosition(this.tejoX, this.tejoY);
     });
 
     this.input.on('pointermove', (p) => {
@@ -168,7 +167,10 @@ export default class GameScene extends Phaser.Scene {
       const factor = dist > 200 ? 200 / dist : 1;
       const nx = this.tejoX + dx * factor;
       const ny = this.tejoY + dy * factor;
-      this.tejo.setPosition(nx, ny);
+      
+      // Solo movemos el visual
+      this.tejoVisual.setPosition(nx, ny);
+      
       this.lineaResortera.clear();
       this.lineaResortera.lineStyle(3, 0xffaa00, 0.8);
       this.lineaResortera.beginPath();
@@ -181,28 +183,30 @@ export default class GameScene extends Phaser.Scene {
       if (!this.isDragging || this.lanzado) return;
       this.isDragging = false;
       this.lineaResortera.clear();
-      const dx = this.tejoX - this.tejo.x;
-      const dy = this.tejoY - this.tejo.y;
-      if (Math.sqrt(dx*dx + dy*dy) < 20) {
-        this.tejo.setPosition(this.tejoX, this.tejoY);
-        return;
-      }
+      this.tejoVisual.setVisible(false);
+      this.tejo.setVisible(true);
+
+      const dx = this.startX - p.worldX;
+      const dy = this.startY - p.worldY;
+      const distancia = Math.sqrt(dx * dx + dy * dy);
+
+      if (distancia < 20) return;
+
       this.lanzado = true;
+      this.timerQuieto = null;
       this.textoInstruccion.setVisible(false);
       this.sonidoLanzar();
-      const vx = Phaser.Math.Clamp(dx * 0.5, -35, 35);
-      const vy = Phaser.Math.Clamp(dy * 0.5, -35, 35);
+
+      // El tejo físico siempre sale desde la misma posición — consistente
+      this.matter.body.setPosition(this.tejo.body, { x: this.tejoX, y: this.tejoY });
       this.tejo.setStatic(false);
-      this.tejo.setVelocity(vx, vy);
+      this.tejo.setVelocity(
+      Phaser.Math.Clamp(dx * 0.35, -40, 40),
+      Phaser.Math.Clamp(dy * 0.35, -40, 40)
+);
     });
 
-    // La música arranca con el primer toque del usuario
     this.input.once('pointerdown', () => this.iniciarMusica());
-
-    // Indicador de progreso hacia la próxima oferta
-    this.textoOferta = this.add.text(GAME_WIDTH/2, GAME_HEIGHT - 25, '🎁 ¡Acumula puntos para una oferta!', {
-    fontSize: '13px', color: '#FFD700', fontFamily: 'Arial'
-    }).setOrigin(0.5).setDepth(10);
   }
 
 actualizarIndicadorOferta() {
@@ -389,26 +393,44 @@ actualizarIndicadorOferta() {
     });
   }
 
-  update() {
+   update() {
     if (this.lanzado && this.vientoFuerza > 0 && this.tejo.body) {
-      this.tejo.applyForce({ x: this.vientoFuerza * this.vientoDireccion, y: 0 });
+        this.tejo.applyForce({ x: this.vientoFuerza * this.vientoDireccion, y: 0 });
     }
 
     if (this.obstaculoObj && this.nivelActual === 3) {
-      const x = this.obstaculoObj.x;
-      if (x > GAME_WIDTH - 80) this.obstaculoDireccion = -1;
-      if (x < 80) this.obstaculoDireccion = 1;
-      this.obstaculoObj.x += 2.5 * this.obstaculoDireccion;
-      this.matter.body.setPosition(this.obstaculoObj.body, {
+        const x = this.obstaculoObj.x;
+        if (x > GAME_WIDTH - 80) this.obstaculoDireccion = -1;
+        if (x < 80) this.obstaculoDireccion = 1;
+        this.obstaculoObj.x += 2.5 * this.obstaculoDireccion;
+        this.matter.body.setPosition(this.obstaculoObj.body, {
         x: this.obstaculoObj.x, y: this.obstaculoObj.y
-      });
+        });
     }
 
-    // Reset solo cuando toca el suelo
+    // Reset cuando toca el suelo
     if (this.lanzado && this.tejo.y > GAME_HEIGHT - 50) {
-      this.resetearTejo();
+        this.resetearTejo();
     }
-  }
+
+    // Reset si lleva más de 1.5 segundos quieto — pero solo después de 0.5s de haber lanzado
+    if (this.lanzado && !this.yaGolpeo && this.tejo.body) {
+        const vel = this.tejo.body.speed;
+        if (vel < 0.3) {
+        if (!this.timerQuieto) {
+            this.timerQuieto = this.time.delayedCall(1500, () => {
+            this.timerQuieto = null;
+            this.resetearTejo();
+            });
+        }
+        } else {
+        if (this.timerQuieto) {
+            this.timerQuieto.remove();
+            this.timerQuieto = null;
+        }
+        }
+    }
+    }
 
   resetearTejo() {
     this.timerQuieto = null;
@@ -416,7 +438,10 @@ actualizarIndicadorOferta() {
     this.yaGolpeo = false;
     this.tejo.setStatic(true);
     this.tejo.setVelocity(0, 0);
+    this.matter.body.setVelocity(this.tejo.body, { x: 0, y: 0 });
     this.tejo.setAngularVelocity(0);
+    this.tejo.setAngle(0);
+    this.matter.body.setPosition(this.tejo.body, { x: this.tejoX, y: this.tejoY });
     this.tejo.setPosition(this.tejoX, this.tejoY);
     this.textoInstruccion.setVisible(true);
 
@@ -487,7 +512,6 @@ if (this.tejoEspecial && this.lanzamientosEspeciales > 0) {
   }
 
   verificarOferta() {
-  const PUNTOS_OFERTA = 3000;
   if (this.puntos >= this.puntosUltimaOferta + PUNTOS_OFERTA) {
     this.puntosUltimaOferta = this.puntos;
     this.scene.pause();

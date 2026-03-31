@@ -36,7 +36,7 @@ export const NIVELES = {
       { x: (GAME_WIDTH / 3) * 2, y: 250, tipo: 'trampa' }
     ],
     viento: true,
-    fuerzaViento: 0.004,
+    fuerzaViento: 0.0003,
     obstaculo: false
   },
   3: {
@@ -46,7 +46,7 @@ export const NIVELES = {
       { x: (GAME_WIDTH / 3) * 2, y: 250, tipo: 'trampa' }
     ],
     viento: true,
-    fuerzaViento: 0.007,
+    fuerzaViento: 0.0005,
     obstaculo: true
   }
 };

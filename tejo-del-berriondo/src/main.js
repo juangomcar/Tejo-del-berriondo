@@ -18,11 +18,11 @@ new Phaser.Game({
   physics: {
     default: 'matter',
     matter: {
-      gravity: { y: 1 },
+      gravity: { y: 2 },
       debug: false
     }
   },
-  scene: [GameScene, SlotScene],
+  scene: [GameScene, SlotScene], 
   scene: [MenuScene, GameScene, SlotScene],
   scene: [MenuScene, GameScene, SlotScene, OfertaScene]
 
