@@ -3,7 +3,8 @@ import casinoBg from '../assets/casino-bg.mp3';
 import {
   GAME_WIDTH, GAME_HEIGHT,
   PHYSICS, COLORS,
-  PUNTOS_JACKPOT, NIVELES
+  PUNTOS_JACKPOT, NIVELES,
+  PUNTOS_OFERTA
 } from '../config/game.config.js';
 
 // GameScene — escena principal del juego
@@ -32,6 +33,8 @@ export default class GameScene extends Phaser.Scene {
     this.vientoDireccion = 1;
     this.obstaculoObj = null;
     this.obstaculoDireccion = 1;
+    this.tejoEspecial = null;
+    this.puntosUltimaOferta = 0;
     this.dianas = [];
   }
 
@@ -140,6 +143,12 @@ export default class GameScene extends Phaser.Scene {
         }
       });
     });
+    this.events.on('resume', (scene, data) => {
+  if (data && data.tejoEspecial) {
+    this.tejoEspecial = data.tejoEspecial;
+    this.mostrarTejoEspecialActivo();
+  }
+});
 
     // Input — resortera
     this.input.on('pointerdown', (p) => {
@@ -187,7 +196,18 @@ export default class GameScene extends Phaser.Scene {
 
     // La música arranca con el primer toque del usuario
     this.input.once('pointerdown', () => this.iniciarMusica());
+
+    // Indicador de progreso hacia la próxima oferta
+    this.textoOferta = this.add.text(GAME_WIDTH/2, GAME_HEIGHT - 25, '🎁 ¡Acumula puntos para una oferta!', {
+    fontSize: '13px', color: '#FFD700', fontFamily: 'Arial'
+    }).setOrigin(0.5).setDepth(10);
   }
+
+actualizarIndicadorOferta() {
+  const faltan = this.puntosUltimaOferta + PUNTOS_OFERTA - this.puntos;
+  if (faltan <= 0) return;
+  this.textoOferta.setText('¡Faltan ' + faltan + ' pts para tu próxima oferta!');
+}
 
   cargarNivel(numero) {
     const config = NIVELES[numero];
@@ -265,6 +285,9 @@ export default class GameScene extends Phaser.Scene {
 
     if (tipo === 'buena') {
       this.puntos += 500;
+      // Verificamos si hay que mostrar una oferta
+      this.verificarOferta();
+      this.actualizarIndicadorOferta();
       this.textoPuntos.setText('Puntos: ' + this.puntos);
       this.sonidoMonedas();
 
@@ -397,6 +420,18 @@ export default class GameScene extends Phaser.Scene {
     this.tejo.setAngularVelocity(0);
     this.tejo.setPosition(this.tejoX, this.tejoY);
     this.textoInstruccion.setVisible(true);
+
+    // Contamos lanzamientos del tejo especial
+if (this.tejoEspecial && this.lanzamientosEspeciales > 0) {
+  this.lanzamientosEspeciales--;
+  if (this.lanzamientosEspeciales === 0) {
+    this.tejoEspecial = null;
+    if (this.textoTejoEspecial) {
+      this.textoTejoEspecial.destroy();
+      this.textoTejoEspecial = null;
+    }
+  }
+}
   }
 
   iniciarMusica() {
@@ -451,4 +486,39 @@ export default class GameScene extends Phaser.Scene {
       osc.start(ctx.currentTime + i * 0.1); osc.stop(ctx.currentTime + i * 0.1 + 0.15);
     });
   }
+
+  verificarOferta() {
+  const PUNTOS_OFERTA = 3000;
+  if (this.puntos >= this.puntosUltimaOferta + PUNTOS_OFERTA) {
+    this.puntosUltimaOferta = this.puntos;
+    this.scene.pause();
+    this.scene.launch('OfertaScene');
+  }
+}
+
+mostrarTejoEspecialActivo() {
+  // Indicador visual de qué tejo especial está activo
+  if (this.textoTejoEspecial) this.textoTejoEspecial.destroy();
+
+  const textos = {
+    fuego: '🔥 Tejo de Fuego activo',
+    hielo: '❄️ Tejo de Hielo activo',
+    explosivo: '💥 Tejo Explosivo activo'
+  };
+
+  const colores = {
+    fuego: '#ff4400',
+    hielo: '#00ccff',
+    explosivo: '#ffaa00'
+  };
+
+  this.textoTejoEspecial = this.add.text(
+    GAME_WIDTH/2, GAME_HEIGHT - 130,
+    textos[this.tejoEspecial],
+    { fontSize: '16px', color: colores[this.tejoEspecial], fontFamily: 'Arial', fontStyle: 'bold' }
+  ).setOrigin(0.5).setDepth(10);
+
+  // Desaparece después de 3 lanzamientos — lo manejamos en resetearTejo
+  this.lanzamientosEspeciales = 3;
+}
 }
