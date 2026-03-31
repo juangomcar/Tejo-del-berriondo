@@ -1,5 +1,7 @@
 # Tejo del Berriondo
 
+Jugar ahora:** https://tejo-del-berriondo.vercel.app/
+
 Juego web mobile-first basado en el deporte más colombiano que existe. La idea es simple: lanzas un tejo metálico contra unas dianas, acumulas puntos, y si tienes suerte — o la física te ayuda — puedes llevarte un jackpot.
 
 ## ¿Qué es esto en realidad?
