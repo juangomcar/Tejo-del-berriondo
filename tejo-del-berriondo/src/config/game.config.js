@@ -24,29 +24,29 @@ export const PUNTOS_JACKPOT = 3000;
 // Configuración de cada nivel
 export const NIVELES = {
   1: {
-    aciertosParaSiguiente: 3,
+    aciertosParaSiguiente: 2,
     dianas: [{ x: GAME_WIDTH / 2, y: 200, tipo: 'buena' }],
     viento: false,
     obstaculo: false
   },
   2: {
-    aciertosParaSiguiente: 5,
-    dianas: [
-      { x: GAME_WIDTH / 3, y: 180, tipo: 'buena' },
-      { x: (GAME_WIDTH / 3) * 2, y: 250, tipo: 'trampa' }
-    ],
-    viento: true,
-    fuerzaViento: 0.003,
-    obstaculo: false
-  },
-  3: {
-    aciertosParaSiguiente: null,
+    aciertosParaSiguiente: 3,
     dianas: [
       { x: GAME_WIDTH / 3, y: 180, tipo: 'buena' },
       { x: (GAME_WIDTH / 3) * 2, y: 250, tipo: 'trampa' }
     ],
     viento: true,
     fuerzaViento: 0.004,
+    obstaculo: false
+  },
+  3: {
+    aciertosParaSiguiente: 3,
+    dianas: [
+      { x: GAME_WIDTH / 3, y: 180, tipo: 'buena' },
+      { x: (GAME_WIDTH / 3) * 2, y: 250, tipo: 'trampa' }
+    ],
+    viento: true,
+    fuerzaViento: 0.007,
     obstaculo: true
   }
 };
@@ -61,7 +61,7 @@ export const PREMIOS_SLOT = [
     probabilidad: 0.30
   },
   {
-    simbolos: ['🥤', '🥤', '🥤'],
+    simbolos: ['🍲', '🍲', '🍲'],
     texto: '¡20% en la Sopa del Día! 🍲',
     descripcion: 'Muéstrale esto al mesero',
     color: '#00ccff',
@@ -82,18 +82,18 @@ export const PREMIOS_SLOT = [
     probabilidad: 0.15
   },
   {
-    simbolos: ['⭐', '⭐', '⭐'],
-    texto: '¡Bebida gratis con tu almuerzo! ⭐',
+    simbolos: ['🥤', '🥤', '🥤'],
+    texto: '¡Bebida gratis con tu almuerzo! 🥤',
     descripcion: 'Muéstrale esto al mesero',
     color: '#00ff88',
-    probabilidad: 0.07
+    probabilidad: 0.099
   },
   {
     simbolos: ['👑', '👑', '👑'],
     texto: '¡Almuerzo completamente GRATIS! 👑',
     descripcion: 'Muéstrale esto al mesero — ¡lo lograste!',
     color: '#ff4444',
-    probabilidad: 0.03
+    probabilidad: 0.00003
   }
 ];
 

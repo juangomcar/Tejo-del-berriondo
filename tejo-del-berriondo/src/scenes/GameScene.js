@@ -35,6 +35,8 @@ export default class GameScene extends Phaser.Scene {
     this.obstaculoDireccion = 1;
     this.tejoEspecial = null;
     this.puntosUltimaOferta = 0;
+    this.ciclo = 1;
+    this.nivelGlobal = 1;
     this.dianas = [];
   }
 
@@ -213,7 +215,7 @@ actualizarIndicadorOferta() {
     const config = NIVELES[numero];
     this.nivelActual = numero;
     this.aciertosNivel = 0;
-    this.textoNivel.setText('Nivel ' + numero);
+    this.textoNivel.setText('Nivel ' + this.nivelGlobal);
 
     // Limpiamos dianas anteriores
     this.dianas.forEach(d => { if (d.imagen) d.imagen.destroy(); });
@@ -234,13 +236,13 @@ actualizarIndicadorOferta() {
     });
 
     // Viento
-    this.vientoFuerza = config.viento ? config.fuerzaViento : 0;
+    this.vientoFuerza = config.viento ? config.fuerzaViento * this.ciclo : 0;
     if (config.viento) {
       this.vientoDireccion = Math.random() > 0.5 ? 1 : -1;
       this.textoViento.setText(this.vientoDireccion > 0 ? '💨 →' : '← 💨');
     } else {
       this.textoViento.setText('');
-    }
+    }   
 
     // Obstáculo nivel 3
     if (config.obstaculo) {
@@ -251,7 +253,7 @@ actualizarIndicadorOferta() {
     }
 
     // Animación de entrada de nivel
-    const textoEntrada = this.add.text(GAME_WIDTH/2, GAME_HEIGHT/2, '¡NIVEL ' + numero + '!', {
+    const textoEntrada = this.add.text(GAME_WIDTH/2, GAME_HEIGHT/2, '¡NIVEL ' + this.nivelGlobal + '!', {
       fontSize: '52px', color: '#FFD700', fontFamily: 'Arial', fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(25).setAlpha(0);
 
@@ -265,18 +267,14 @@ actualizarIndicadorOferta() {
     this.actualizarProgreso();
   }
 
-  actualizarProgreso() {
-    const config = NIVELES[this.nivelActual];
-    if (!config.aciertosParaSiguiente) {
-      this.textoProgreso.setText('🏆 Nivel final');
-      return;
-    }
-    let estrellas = '';
+    actualizarProgreso() {
+     const config = NIVELES[this.nivelActual];
+     let estrellas = '';
     for (let i = 0; i < config.aciertosParaSiguiente; i++) {
       estrellas += i < this.aciertosNivel ? '⭐' : '☆';
-    }
-    this.textoProgreso.setText(estrellas);
-  }
+     }
+     this.textoProgreso.setText(estrellas);
+    }   
 
   golpearDiana(tipo) {
     if (this.yaGolpeo) return;
@@ -311,18 +309,19 @@ actualizarIndicadorOferta() {
       }
 
       // Verificamos si sube de nivel
-      const config = NIVELES[this.nivelActual];
-      if (config.aciertosParaSiguiente && this.aciertosNivel >= config.aciertosParaSiguiente) {
-        const siguiente = this.nivelActual + 1;
-        if (siguiente <= 3) {
-          this.time.delayedCall(800, () => {
-            this.sonidoAcordeon();
-            this.cargarNivel(siguiente);
-            this.resetearTejo();
-          });
-          return;
-        }
-      }
+        const config = NIVELES[this.nivelActual];
+    if (config.aciertosParaSiguiente && this.aciertosNivel >= config.aciertosParaSiguiente) {
+    const siguiente = this.nivelActual + 1;
+    const nivelSiguiente = siguiente <= 3 ? siguiente : 1;
+    if (siguiente > 3) this.ciclo++;
+    this.nivelGlobal++;
+    this.time.delayedCall(800, () => {
+        this.sonidoAcordeon();
+        this.cargarNivel(nivelSiguiente);
+        this.resetearTejo();
+    });
+    return;
+    }
 
       // Si no pasó nada especial, resetea normal
       this.resetearTejo();
