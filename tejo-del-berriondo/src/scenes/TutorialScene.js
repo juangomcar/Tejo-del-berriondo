@@ -2,15 +2,16 @@ import Phaser from 'phaser';
 import npc from '../assets/donkey_clean.png';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/game.config.js';
 
-// TutorialScene — NPC que explica el juego antes de arrancar
 export default class TutorialScene extends Phaser.Scene {
 
   constructor() {
     super({ key: 'TutorialScene' });
     this.mensajeActual = 0;
+    this.nombreJugador = '';
+    this.inputEl = null;
     this.mensajes = [
-      '¡Bienvenido al Tejo del Berriondo! \nYo soy Burrito, tu guía.',
-      'Para jugar, arrastra el tejo hacia abajo\ncomo una resortera y suéltalo\npara lanzarlo hacia arriba.',
+      '¡Bienvenido al Tejo del Berriondo!\nYo soy Burrito, tu guía.\n¿Cómo te llamas?',
+      'Bienvenido {nombre},\nArrastra el tejo hacia abajo\ncomo una resortera y suéltalo\npara lanzarlo hacia arriba.',
       'La diana ROJA te da puntos. 🔴\nLa diana AZUL te los quita. 🔵\n¡Ojo con cuál le pegas!',
       'Acumula aciertos seguidos\npara subir de nivel.\nCada nivel es más difícil.',
       'Si tienes suerte, el JACKPOT\nexplota y puedes ganar\npremios del restaurante. 🎰',
@@ -20,18 +21,17 @@ export default class TutorialScene extends Phaser.Scene {
 
   preload() {
     this.load.image('npc', npc);
-  } 
+  }
 
   create() {
     // Fondo
     this.add.rectangle(GAME_WIDTH/2, GAME_HEIGHT/2, GAME_WIDTH, GAME_HEIGHT, 0x1a1a2e);
 
-    // NPC — el burro
+    // NPC
     this.npcImg = this.add.image(GAME_WIDTH/2 - 12, GAME_HEIGHT/2 - 160, 'npc');
     this.npcImg.setDisplaySize(420, 420);
-    this.npcImg.setOrigin(0.5); 
+    this.npcImg.setOrigin(0.5);
 
-    // Animación suave del NPC
     this.tweens.add({
       targets: this.npcImg,
       y: GAME_HEIGHT/2 - 130,
@@ -62,33 +62,64 @@ export default class TutorialScene extends Phaser.Scene {
       fontSize: '22px', color: '#FFD700', fontFamily: 'Arial', fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    // Indicador de progreso
     this.textoProgreso = this.add.text(GAME_WIDTH/2, GAME_HEIGHT/2 + 285, '', {
       fontSize: '14px', color: '#aaaaaa', fontFamily: 'Arial'
     }).setOrigin(0.5);
+
+    // Input HTML nativo — más compatible que add.dom
+    this.inputEl = document.createElement('input');
+    this.inputEl.type = 'text';
+    this.inputEl.placeholder = 'Tu nombre...';
+    this.inputEl.maxLength = 15;
+    this.inputEl.style.cssText = `
+      position: absolute;
+      font-size: 20px;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 2px solid #8B2500;
+      text-align: center;
+      width: 220px;
+      font-family: Arial;
+      color: #1a1a2e;
+      display: none;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 63%;
+      z-index: 1000;
+    `;
+    document.body.appendChild(this.inputEl);
+    this.inputEl.addEventListener('click', (e) => e.stopPropagation());
+    this.inputEl.addEventListener('pointerdown', (e) => e.stopPropagation());
 
     this.botonSig.on('pointerdown', () => this.siguiente());
     this.botonSig.on('pointerover', () => this.botonSig.setFillStyle(0xaa3300));
     this.botonSig.on('pointerout', () => this.botonSig.setFillStyle(0x8B2500));
 
-    // Mostramos el primer mensaje
     this.mostrarMensaje();
   }
 
   mostrarMensaje() {
-    this.textoDial.setText(this.mensajes[this.mensajeActual]);
+    // Reemplaza {nombre} si ya lo tenemos
+    const texto = this.mensajes[this.mensajeActual].replace('{nombre}', this.nombreJugador || '');
+    this.textoDial.setText(texto);
     this.textoProgreso.setText((this.mensajeActual + 1) + ' / ' + this.mensajes.length);
+    this.inputEl.style.display = this.mensajeActual === 0 ? 'block' : 'none';
 
-    // Último mensaje — cambiamos el botón
     if (this.mensajeActual === this.mensajes.length - 1) {
       this.textoBoton.setText('¡A jugar! 🎯');
     }
   }
 
   siguiente() {
+    if (this.mensajeActual === 0) {
+      const nombre = this.inputEl.value.trim();
+      this.nombreJugador = nombre || 'Jugador';
+      this.registry.set('nombreJugador', this.nombreJugador);
+    }
+
     this.mensajeActual++;
     if (this.mensajeActual >= this.mensajes.length) {
-      // Arrancamos el juego
+      this.inputEl.remove();
       this.cameras.main.fadeOut(400, 0, 0, 0);
       this.cameras.main.once('camerafadeoutcomplete', () => {
         this.scene.start('GameScene');

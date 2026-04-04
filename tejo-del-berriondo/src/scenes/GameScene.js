@@ -111,8 +111,9 @@ export default class GameScene extends Phaser.Scene {
     this.tejoVisual = this.add.circle(this.tejoX, this.tejoY, 25, 0x999999).setDepth(6);
     this.tejoVisual.setVisible(false);
 
-    this.textoPuntos = this.add.text(20, 30, 'Puntos: 0', {
-      fontSize: '28px', color: '#ffffff', fontFamily: 'Arial'
+    const nombre = this.registry.get('nombreJugador') || 'Jugador';
+    this.textoPuntos = this.add.text(20, 30, nombre + ': 0', {
+    fontSize: '24px', color: '#ffffff', fontFamily: 'Arial'
     }).setDepth(10);
 
     this.textoNivel = this.add.text(GAME_WIDTH-20, 30, 'Nivel 1', {
@@ -290,8 +291,7 @@ actualizarIndicadorOferta() {
       // Verificamos si hay que mostrar una oferta
       this.verificarOferta();
       this.actualizarIndicadorOferta();
-      this.textoPuntos.setText('Puntos: ' + this.puntos);
-      this.sonidoMonedas();
+      this.textoPuntos.setText((this.registry.get('nombreJugador') || 'Jugador') + ': ' + this.puntos);      this.sonidoMonedas();
 
       // 35% de probabilidad de sumar al jackpot
       if (Math.random() < 0.35) {
@@ -333,8 +333,7 @@ actualizarIndicadorOferta() {
     } else {
       // Diana trampa — quita puntos y resetea aciertos
       this.puntos = Math.max(0, this.puntos - 500);
-      this.textoPuntos.setText('Puntos: ' + this.puntos);
-      this.aciertosNivel = 0;
+      this.textoPuntos.setText((this.registry.get('nombreJugador') || 'Jugador') + ': ' + this.puntos);      this.aciertosNivel = 0;
       this.golpesConsecutivos = 0;
       this.actualizarProgreso();
 
@@ -384,8 +383,7 @@ actualizarIndicadorOferta() {
         textoBonus.destroy();
         this.puntos += 1000;
         this.puntosJackpot = 0;
-        this.textoPuntos.setText('Puntos: ' + this.puntos);
-        if (this.musica) this.musica.setRate(1.0);
+        this.textoPuntos.setText((this.registry.get('nombreJugador') || 'Jugador') + ': ' + this.puntos);        if (this.musica) this.musica.setRate(1.0);
         // Pausamos GameScene y lanzamos la slot machine
         this.scene.pause();
         this.scene.launch('SlotScene');
