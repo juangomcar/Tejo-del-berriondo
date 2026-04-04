@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import GameScene from './scenes/GameScene.js';
 import SlotScene from './scenes/SlotScene.js';
 import OfertaScene from './scenes/OfertaScene.js';
+import TutorialScene from './scenes/TutorialScene.js';
 import { GAME_WIDTH, GAME_HEIGHT } from './config/game.config.js';
 
 // Punto de entrada — solo inicializa el juego y registra las escenas
@@ -24,7 +25,8 @@ new Phaser.Game({
   },
   scene: [GameScene, SlotScene], 
   scene: [MenuScene, GameScene, SlotScene],
-  scene: [MenuScene, GameScene, SlotScene, OfertaScene]
+  scene: [MenuScene, GameScene, SlotScene, OfertaScene],
+  scene: [MenuScene, TutorialScene, GameScene, SlotScene, OfertaScene]
 
 
 });
