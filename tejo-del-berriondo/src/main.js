@@ -4,6 +4,7 @@ import TutorialScene from './scenes/TutorialScene.js';
 import GameScene from './scenes/GameScene.js';
 import SlotScene from './scenes/SlotScene.js';
 import OfertaScene from './scenes/OfertaScene.js';
+import PersonajeScene from './scenes/PersonajeScene.js';
 import { GAME_WIDTH, GAME_HEIGHT } from './config/game.config.js';
 
 new Phaser.Game({
@@ -25,5 +26,5 @@ new Phaser.Game({
       debug: false
     }
   },
-  scene: [MenuScene, TutorialScene, GameScene, SlotScene, OfertaScene]
+  scene: [MenuScene, TutorialScene, PersonajeScene, GameScene, SlotScene, OfertaScene]
 });

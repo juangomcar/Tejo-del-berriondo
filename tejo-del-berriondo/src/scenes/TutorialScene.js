@@ -10,8 +10,8 @@ export default class TutorialScene extends Phaser.Scene {
     this.nombreJugador = '';
     this.inputEl = null;
     this.mensajes = [
-      '¡Bienvenido al Tejo del Berriondo!\nYo soy Burrito, tu guía.\n¿Cómo te llamas?',
-      'Bienvenido {nombre},\nArrastra el tejo hacia abajo\ncomo una resortera y suéltalo\npara lanzarlo hacia arriba.',
+      '¡Bienvenid@ al Tejo del Berriondo!\nYo soy Burrito, tu guía.\n¿Cómo te llamas?',
+      'Bienvenid@ {nombre},\nArrastra el tejo hacia abajo\ncomo una resortera y suéltalo\npara lanzarlo hacia arriba.',
       'La diana ROJA te da puntos. 🔴\nLa diana AZUL te los quita. 🔵\n¡Ojo con cuál le pegas!',
       'Acumula aciertos seguidos\npara subir de nivel.\nCada nivel es más difícil.',
       'Si tienes suerte, el JACKPOT\nexplota y puedes ganar\npremios del restaurante. 🎰',
@@ -146,7 +146,7 @@ export default class TutorialScene extends Phaser.Scene {
       this.inputEl.remove();
       this.cameras.main.fadeOut(400, 0, 0, 0);
       this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start('GameScene');
+        this.scene.start('PersonajeScene');
       });
     } else {
       this.mostrarMensaje();

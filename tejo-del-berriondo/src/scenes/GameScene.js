@@ -45,8 +45,8 @@ export default class GameScene extends Phaser.Scene {
     const g = this.make.graphics({ x: 0, y: 0, add: false });
     g.fillStyle(0x000000, 0.3);
     g.fillCircle(53, 53, 25);
-    g.fillStyle(0x999999, 1);
-    g.fillCircle(50, 50, 25);
+    const colorTejo = this.registry.get('colorTejo') ?? 0x999999;
+    g.fillStyle(colorTejo, 1);    g.fillCircle(50, 50, 25);
     g.fillStyle(0xcccccc, 0.6);
     g.fillCircle(42, 42, 8);
     g.generateTexture('tejo', 100, 100);
@@ -108,7 +108,8 @@ export default class GameScene extends Phaser.Scene {
     this.lineaResortera = this.add.graphics();
     
     // Punto visual del tejo mientras apunta — separado del físico
-    this.tejoVisual = this.add.circle(this.tejoX, this.tejoY, 25, 0x999999).setDepth(6);
+    const colorTejo = this.registry.get('colorTejo') ?? 0x999999;
+    this.tejoVisual = this.add.circle(this.tejoX, this.tejoY, 25, colorTejo).setDepth(6);
     this.tejoVisual.setVisible(false);
 
     const nombre = this.registry.get('nombreJugador') || 'Jugador';
