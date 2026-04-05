@@ -45,8 +45,8 @@ export default class TutorialScene extends Phaser.Scene {
     this.cajaDial = this.add.rectangle(GAME_WIDTH/2, GAME_HEIGHT/2 + 110, 380, 180, 0xffffff, 0.95);
     this.cajaDial.setStrokeStyle(3, 0x8B2500);
 
-    // Texto del diálogo
-    this.textoDial = this.add.text(GAME_WIDTH/2, GAME_HEIGHT/2 + 110, '', {
+    // Texto del diálogo — en el mensaje 0 lo subimos para dar espacio al input
+    this.textoDial = this.add.text(GAME_WIDTH/2, GAME_HEIGHT/2 + 75, '', {
       fontSize: '18px',
       color: '#1a1a2e',
       fontFamily: 'Arial',
@@ -66,25 +66,22 @@ export default class TutorialScene extends Phaser.Scene {
       fontSize: '14px', color: '#aaaaaa', fontFamily: 'Arial'
     }).setOrigin(0.5);
 
-    // Input HTML nativo — más compatible que add.dom
+    // Input HTML — posicionado con coordenadas reales del canvas
     this.inputEl = document.createElement('input');
     this.inputEl.type = 'text';
     this.inputEl.placeholder = 'Tu nombre...';
     this.inputEl.maxLength = 15;
     this.inputEl.style.cssText = `
-      position: absolute;
-      font-size: 20px;
-      padding: 10px 15px;
+      position: fixed;
+      font-size: 18px;
+      padding: 8px 14px;
       border-radius: 8px;
       border: 2px solid #8B2500;
       text-align: center;
-      width: 220px;
       font-family: Arial;
       color: #1a1a2e;
+      background: white;
       display: none;
-      left: 50%;
-      transform: translateX(-50%);
-      top: 63%;
       z-index: 1000;
     `;
     document.body.appendChild(this.inputEl);
@@ -98,12 +95,39 @@ export default class TutorialScene extends Phaser.Scene {
     this.mostrarMensaje();
   }
 
+  posicionarInput() {
+    const rect = this.game.canvas.getBoundingClientRect();
+    const scaleY = rect.height / GAME_HEIGHT;
+    const scaleX = rect.width / GAME_WIDTH;
+
+    // El input va debajo del texto y arriba del botón
+    const gameY = GAME_HEIGHT / 2 + 120;
+    const pixelY = rect.top + gameY * scaleY;
+    const pixelX = rect.left + (GAME_WIDTH / 2) * scaleX;
+    const inputWidth = Math.round(220 * scaleX);
+
+    this.inputEl.style.top = pixelY + 'px';
+    this.inputEl.style.left = (pixelX - inputWidth / 2 - 16) + 'px';
+    this.inputEl.style.width = inputWidth + 'px';
+    this.inputEl.style.fontSize = Math.round(18 * scaleY) + 'px';
+  }
+
   mostrarMensaje() {
-    // Reemplaza {nombre} si ya lo tenemos
     const texto = this.mensajes[this.mensajeActual].replace('{nombre}', this.nombreJugador || '');
+
+    if (this.mensajeActual === 0) {
+      // Subimos el texto para dar espacio al input abajo
+      this.textoDial.setY(GAME_HEIGHT / 2 + 75);
+      this.inputEl.style.display = 'block';
+      this.posicionarInput();
+    } else {
+      // Texto centrado normal en los demás mensajes
+      this.textoDial.setY(GAME_HEIGHT / 2 + 110);
+      this.inputEl.style.display = 'none';
+    }
+
     this.textoDial.setText(texto);
     this.textoProgreso.setText((this.mensajeActual + 1) + ' / ' + this.mensajes.length);
-    this.inputEl.style.display = this.mensajeActual === 0 ? 'block' : 'none';
 
     if (this.mensajeActual === this.mensajes.length - 1) {
       this.textoBoton.setText('¡A jugar! 🎯');
