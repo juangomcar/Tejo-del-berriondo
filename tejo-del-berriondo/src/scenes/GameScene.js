@@ -718,6 +718,8 @@ export default class GameScene extends Phaser.Scene {
         this.puntosJackpot += jackpotBonus;
         this.actualizarBarraJackpot();
         this.actualizarVelocidadMusica();
+        this.tweens.killTweensOf(this.barraJackpot);
+        this.barraJackpot.setScale(1);
         this.tweens.add({ targets: this.barraJackpot, scaleY: 1.4, duration: 100, yoyo: true });
 
         if (this.puntosJackpot >= PUNTOS_JACKPOT) {
@@ -765,13 +767,14 @@ export default class GameScene extends Phaser.Scene {
       if (this.comboPanel) { this.comboPanel.destroy(); this.comboPanel = null; }
       this.apagarRachaCaliente();
 
-      // Jackpot bar: flash rojo + sacudida
-      this.tweens.add({ targets: this.barraJackpot, scaleY: 0.3, duration: 120, yoyo: true, repeat: 2 });
-      const barFlash = this.add.graphics().setDepth(12);
+      // Jackpot bar: flash azul encima + sacudida en el texto del %
       const { _barM: m, _barW: w, _barY: barY } = this;
-      barFlash.fillStyle(0x4488ff, 0.55);
+      const barFlash = this.add.graphics().setDepth(12);
+      barFlash.fillStyle(0x4488ff, 0.6);
       barFlash.fillRoundedRect(m, barY - 7, w, 14, 7);
-      this.tweens.add({ targets: barFlash, alpha: 0, duration: 500, onComplete: () => barFlash.destroy() });
+      this.tweens.add({ targets: barFlash, alpha: 0, duration: 600, onComplete: () => barFlash.destroy() });
+      this.tweens.killTweensOf(this.textoJackpotPct);
+      this.tweens.add({ targets: this.textoJackpotPct, scaleX: 1.5, scaleY: 1.5, duration: 120, yoyo: true, repeat: 2, ease: 'Power2.easeOut', onComplete: () => this.textoJackpotPct.setScale(1) });
 
       this.cameras.main.shake(300, 0.015);
       this.cameras.main.flash(350, 0, 50, 180, false);
