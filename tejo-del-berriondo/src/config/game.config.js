@@ -1,3 +1,12 @@
+// ═══════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN DEL RESTAURANTE — cambia esto para adaptar el juego
+// ═══════════════════════════════════════════════════════════════════
+export const RESTAURANTE = {
+  nombre: 'Restaurante de Julián',
+  tagline: 'Juega, come y gana',
+  nombreJuego: 'Tejo del Berriondo',
+};
+
 // Dimensiones base — móvil vertical
 export const GAME_WIDTH = 480;
 export const GAME_HEIGHT = 854;
@@ -9,20 +18,38 @@ export const PHYSICS = {
   frictionAir: 0.01
 };
 
-// Colores del juego
+// Paleta de colores
 export const COLORS = {
-  background: 0x1a1a2e,
+  background: 0x080818,
+  bgTop: 0x050512,
+  bgBottom: 0x0d1525,
   tejo: 0x999999,
   dianabuena: 0xe94560,
   dianatrampa: 0x4488ff,
-  obstaculo: 0x666666
+  obstaculo: 0x445566,
+  gold: 0xFFD700,
+  hudBg: 0x000000,
 };
+
+// Fuente del juego — se carga desde Google Fonts en index.html
+export const FONT = "'Baloo 2', Arial, sans-serif";
 
 // Puntos necesarios para el jackpot
 export const PUNTOS_JACKPOT = 3000;
 
-// Configuración de cada nivel
+// Total de niveles por ciclo — incrementar aquí si se añaden más
+export const TOTAL_NIVELES = 9;
+
+// Configuración de cada nivel.
+// Los niveles se agrupan en ciclos de TOTAL_NIVELES. Al completar el último
+// nivel, el juego vuelve al nivel 1 pero con this.ciclo++ (más viento).
+//
+// Progresión de dificultad:
+//   Niveles 1-3 → 1 diana buena (aprendizaje)
+//   Niveles 4-6 → 2 dianas buenas (velocidad)
+//   Niveles 7-9 → 3 dianas buenas (maestría)
 export const NIVELES = {
+  // ── Ciclo base: una diana buena ─────────────────────────────────
   1: {
     aciertosParaSiguiente: 2,
     dianas: [{ x: GAME_WIDTH / 2, y: 200, tipo: 'buena' }],
@@ -33,7 +60,7 @@ export const NIVELES = {
     aciertosParaSiguiente: 3,
     dianas: [
       { x: GAME_WIDTH / 3, y: 180, tipo: 'buena' },
-      { x: (GAME_WIDTH / 3) * 2, y: 250, tipo: 'trampa' }
+      { x: (GAME_WIDTH / 3) * 2, y: 255, tipo: 'trampa' }
     ],
     viento: true,
     fuerzaViento: 0.0003,
@@ -47,6 +74,80 @@ export const NIVELES = {
     ],
     viento: true,
     fuerzaViento: 0.0005,
+    obstaculo: true
+  },
+
+  // ── Dos dianas buenas: el jugador elige su objetivo ─────────────
+  4: {
+    aciertosParaSiguiente: 4,
+    dianas: [
+      { x: 130, y: 180, tipo: 'buena' },
+      { x: 350, y: 200, tipo: 'buena' },
+      { x: GAME_WIDTH / 2, y: 310, tipo: 'trampa' }
+    ],
+    viento: false,
+    obstaculo: false
+  },
+  5: {
+    aciertosParaSiguiente: 4,
+    dianas: [
+      { x: 160, y: 170, tipo: 'buena' },
+      { x: 320, y: 235, tipo: 'buena' },
+      { x: 160, y: 320, tipo: 'trampa' }
+    ],
+    viento: true,
+    fuerzaViento: 0.0004,
+    obstaculo: false
+  },
+  6: {
+    aciertosParaSiguiente: 4,
+    dianas: [
+      { x: 130, y: 175, tipo: 'buena' },
+      { x: 350, y: 190, tipo: 'buena' },
+      { x: GAME_WIDTH / 2, y: 175, tipo: 'trampa' },
+      { x: GAME_WIDTH / 2, y: 320, tipo: 'trampa' }
+    ],
+    viento: true,
+    fuerzaViento: 0.0005,
+    obstaculo: true
+  },
+
+  // ── Tres dianas buenas: tablero lleno, máxima tensión ───────────
+  7: {
+    aciertosParaSiguiente: 5,
+    dianas: [
+      { x: 100, y: 180, tipo: 'buena' },
+      { x: GAME_WIDTH / 2, y: 160, tipo: 'buena' },
+      { x: 380, y: 195, tipo: 'buena' },
+      { x: GAME_WIDTH / 2, y: 315, tipo: 'trampa' }
+    ],
+    viento: false,
+    obstaculo: false
+  },
+  8: {
+    aciertosParaSiguiente: 5,
+    dianas: [
+      { x: 110, y: 165, tipo: 'buena' },
+      { x: GAME_WIDTH / 2, y: 190, tipo: 'buena' },
+      { x: 370, y: 165, tipo: 'buena' },
+      { x: 175, y: 310, tipo: 'trampa' },
+      { x: 305, y: 310, tipo: 'trampa' }
+    ],
+    viento: true,
+    fuerzaViento: 0.0006,
+    obstaculo: false
+  },
+  9: {
+    aciertosParaSiguiente: 5,
+    dianas: [
+      { x: 120, y: 165, tipo: 'buena' },
+      { x: GAME_WIDTH / 2, y: 190, tipo: 'buena' },
+      { x: 360, y: 165, tipo: 'buena' },
+      { x: 180, y: 315, tipo: 'trampa' },
+      { x: 300, y: 315, tipo: 'trampa' }
+    ],
+    viento: true,
+    fuerzaViento: 0.0008,
     obstaculo: true
   }
 };
@@ -135,4 +236,4 @@ export const OFERTAS = [
 ];
 
 // Puntos para activar una oferta
-export const PUNTOS_OFERTA = 3000;
+export const PUNTOS_OFERTA = 9000;

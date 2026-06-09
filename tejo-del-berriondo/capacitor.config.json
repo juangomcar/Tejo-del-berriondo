@@ -1,0 +1,11 @@
+{
+  "appId": "com.berriondo.tejo",
+  "appName": "Tejo del Berriondo",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
