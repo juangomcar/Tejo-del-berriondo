@@ -753,19 +753,30 @@ export default class GameScene extends Phaser.Scene {
       this.resetearTejo();
 
     } else {
-      // Diana trampa
-      this.puntos = Math.max(0, this.puntos - 500);
-      this.textoPuntos.setText((this.registry.get('nombreJugador') || 'Jugador') + ': ' + this.puntos);
+      // Diana trampa — penaliza la barra del jackpot
+      const penalidad = 750;
+      this.puntosJackpot = Math.max(0, this.puntosJackpot - penalidad);
+      this.actualizarBarraJackpot();
+      this.actualizarVelocidadMusica();
+
       this.aciertosNivel = 0;
       this.golpesConsecutivos = 0;
       this.comboMultiplier = 1;
       if (this.comboPanel) { this.comboPanel.destroy(); this.comboPanel = null; }
       this.apagarRachaCaliente();
 
+      // Jackpot bar: flash rojo + sacudida
+      this.tweens.add({ targets: this.barraJackpot, scaleY: 0.3, duration: 120, yoyo: true, repeat: 2 });
+      const barFlash = this.add.graphics().setDepth(12);
+      const { _barM: m, _barW: w, _barY: barY } = this;
+      barFlash.fillStyle(0x4488ff, 0.55);
+      barFlash.fillRoundedRect(m, barY - 7, w, 14, 7);
+      this.tweens.add({ targets: barFlash, alpha: 0, duration: 500, onComplete: () => barFlash.destroy() });
+
       this.cameras.main.shake(300, 0.015);
       this.cameras.main.flash(350, 0, 50, 180, false);
       this.emitirParticulas(pos.x, pos.y, 'trampa');
-      this.mostrarPuntosFlotantes(pos.x, pos.y, '-500', '#4488ff');
+      this.mostrarPuntosFlotantes(pos.x, pos.y, '🎰 -' + penalidad, '#4488ff');
       this.actualizarProgreso();
 
       this.time.delayedCall(300, () => this.resetearTejo());
