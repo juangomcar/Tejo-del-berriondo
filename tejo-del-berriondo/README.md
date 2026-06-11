@@ -1,7 +1,6 @@
 # Tejo del Berriondo
-
 **Jugar ahora:** https://tejo-del-berriondo.vercel.app/
-
+ 
 Juego mobile-first basado en el deporte más colombiano que existe. Lanzas un tejo metálico contra unas dianas, acumulas puntos, y si tienes suerte puedes llevarte premios reales del restaurante.
 
 ## ¿Qué es esto en realidad?
@@ -55,3 +54,4 @@ npm run android:sync
 El proyecto Android vive en `android/`. Si ya está generado, ábrelo directamente con **File → Open** en Android Studio.
 
 > Cada vez que cambies código del juego hay que correr `npm run android:sync` antes de volver a lanzar desde el emulador.
+ restaurante, personajes, multijugador.restaurante, personajes, multijugador.

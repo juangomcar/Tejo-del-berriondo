@@ -11,11 +11,11 @@ export default class TutorialScene extends Phaser.Scene {
     this.inputEl = null;
     this.mensajes = [
       '¡Bienvenid@ al Tejo del Berriondo!\nYo soy Burrito, tu guía.\n¿Cómo te llamas?',
-      'Bienvenid@ {nombre},\nArrastra el tejo hacia abajo\ncomo una resortera y suéltalo\npara lanzarlo hacia arriba.',
-      'La diana ROJA te da puntos. 🔴\nLa diana AZUL te los quita. 🔵\n¡Ojo con cuál le pegas!',
+      'Bienvenid@ {nombre},\nDesliza el dedo hacia arriba\npara lanzar el tejo.\nEl ángulo controla la dirección.',
+      '¡Pégale a la MECHA ROSADA\npara que explote! 💥\nLa mecha azul está mojada\ny te quita puntos. 🔵',
       'Acumula aciertos seguidos\npara subir de nivel.\nCada nivel es más difícil.',
       'Si tienes suerte, el JACKPOT\nexplota y puedes ganar\npremios del restaurante. 🎰',
-      '¡Listo! Ya sabes todo.\n¡A lanzar ese tejo\nberriondo!'
+      '¡Listo! Ya sabes todo.\n¡A lanzar ese tejo\nberriondo!',
     ];
   }
 

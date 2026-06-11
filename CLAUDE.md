@@ -41,7 +41,8 @@ Three selectable characters, each sets `personaje` key and `colorTejo` in the re
 
 ### GameScene — the core loop
 
-- **Slingshot mechanic**: pointer drag → `pointerup` computes `dx/dy` from start point and calls `this.tejo.setVelocity()` with a `speedMult` that varies by active power
+- **Throw mechanic**: swipe upward anywhere on screen → `pointerup` computes upward distance + horizontal offset; velocity direction = swipe direction (NOT slingshot reversal). `upDist < 28px` is ignored. During drag, `dibujarAim()` renders a simulated arc preview. Physics walls are angled to match the 3D court trapezoid.
+- **Perspective 3D court**: `crearFondo()` draws a clay trapezoid (widest at player end, narrows to bocín at top). Dianas scale via `perspectiveScale()` from `TENANT_CONFIG.cancha`. Tejo scales dynamically in `update()` as it travels (scale 1.0 at bottom → 0.38 at top). Reset in `resetearTejo()` restores scale to 1.
 - **Dianas**: Matter.js static sensor bodies — red (`diana-buena`, +500 pts base) and blue (`diana-trampa`, -500 pts, resets combo). Collision detected via `this.matter.world.on('collisionstart', …)`
 - **Level progression**: `aciertosNivel` consecutive red hits per level (from `NIVELES[n].aciertosParaSiguiente`); levels cycle 1→2→3→1 while `ciclo` increments, increasing wind force each cycle
 - **Jackpot meter**: `puntosJackpot` (0→`PUNTOS_JACKPOT`=3000); 35% chance per red hit adds 500 pts (750 for explosivo); reaching threshold triggers `jackpot()` → launches SlotScene
@@ -66,13 +67,15 @@ Three selectable characters, each sets `personaje` key and `colorTejo` in the re
 
 ### OfertaScene
 
-Shown every 3000 score points. Picks a random offer from `OFERTAS`. On accept, resumes GameScene with `{ tejoEspecial: offer.id }`. On reject, resumes with `{ tejoEspecial: null }`.
+Shown every 9000 score points (`PUNTOS_OFERTA`). Picks a random offer from `OFERTAS`. On accept, resumes GameScene with `{ tejoEspecial: offer.id }`. On reject, resumes with `{ tejoEspecial: null }`.
 
 ### Key config values (`src/config/game.config.js`)
 
 | Constant | Purpose |
 |---|---|
+| `RESTAURANTE` | Restaurant branding: `nombre`, `tagline`, `nombreJuego` — change this when deploying for a new venue |
 | `NIVELES` | Level definitions: diana positions, wind flag, `fuerzaViento`, obstacle flag, `aciertosParaSiguiente` |
+| `TOTAL_NIVELES` (9) | Number of levels per cycle; increase here if adding more levels to `NIVELES` |
 | `PUNTOS_JACKPOT` (3000) | `puntosJackpot` threshold to trigger SlotScene |
 | `PUNTOS_OFERTA` (9000) | Score interval that triggers OfertaScene |
 | `PREMIOS_SLOT` | Slot prize pool — each entry has `simbolos`, `texto`, `probabilidad` |
@@ -91,3 +94,4 @@ Shown every 3000 score points. Picks a random offer from `OFERTAS`. On accept, r
 
 - `parent: 'app'` in `main.js` is critical — without it Phaser appends the canvas to `<body>` after the `#app` div, pushing it 854px below the viewport.
 - `dom.createContainer: true` is required for TutorialScene's HTML `<input>` element (player name entry); removing it breaks the name input overlay.
+- `matter.debug: false` in `main.js` — set to `true` to render Matter.js collision bodies as wireframes, useful for tuning diana hit areas and obstacle boundaries.

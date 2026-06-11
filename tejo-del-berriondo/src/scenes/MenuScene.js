@@ -205,7 +205,7 @@ export default class MenuScene extends Phaser.Scene {
     });
 
     // Instrucción pequeña
-    this.add.text(cx, by + 55, 'Arrastra y lanza el tejo', {
+    this.add.text(cx, by + 55, 'Desliza hacia arriba para lanzar', {
       fontSize: '14px',
       color: '#665555',
       fontFamily: FONT

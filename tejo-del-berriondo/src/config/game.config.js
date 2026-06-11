@@ -7,6 +7,76 @@ export const RESTAURANTE = {
   nombreJuego: 'Tejo del Berriondo',
 };
 
+// ═══════════════════════════════════════════════════════════════════
+// TENANT CONFIG — objeto único por tenant para polimorfismo completo
+// Para un tenant nuevo: copia este bloque, cambia los valores y
+// pásalo al juego. Sin tocar el código base.
+// ═══════════════════════════════════════════════════════════════════
+export const TENANT_CONFIG = {
+  id: 'la-tierrita',
+
+  restaurante: {
+    nombre:      'La Tierrita del Berriondo',
+    tagline:     'Juega, come y gana',
+    nombreJuego: 'Tejo del Berriondo',
+  },
+
+  fuente: "'Baloo 2', Arial, sans-serif",
+
+  colores: {
+    // Cancha
+    pisoOscuro:  0x4A2810,   // clay base
+    pisoMedio:   0x6B3D1A,   // clay mid
+    pisoClaro:   0x8A5228,   // clay highlight (far end)
+    paredes:     0x2E1608,   // side boards / walls
+    bocin:       0xFFD700,   // target circle
+    canaleta:    0x3D2208,   // edge trim
+    // Gameplay
+    dianabuena:  0xe94560,
+    dianatrampa: 0x4488ff,
+    // UI
+    primario:    0xFFD700,
+    tejo:        0x888888,
+  },
+
+  // Geometría de la cancha — define la perspectiva 3-D
+  // topY/botY: límites verticales del área jugable
+  // topHW/botHW: semi-ancho de la cancha en ese extremo
+  cancha: {
+    topY:  150,   // deja banda visible (100-150) para el rancho bajo el HUD
+    botY:  782,   // GAME_HEIGHT - 72
+    topHW: 72,
+    botHW: 220,
+  },
+
+  personajes: [
+    { key: 'campesino', nombre: 'El Campesino', colorTejo: 0x999999, emoji: '👨‍🌾', desc: 'Veterano del tejo' },
+    { key: 'abuela',    nombre: 'La Abuela',    colorTejo: 0x9b59b6, emoji: '👵',    desc: 'Tiro certero' },
+    { key: 'minero',    nombre: 'El Minero',    colorTejo: 0x1a1a1a, emoji: '⛏️',   desc: 'Fuerza bruta' },
+  ],
+
+  textos: {
+    instruccionLanzar: 'Desliza ↑ hacia la diana para lanzar',
+    npcNombre: 'Burrito',
+    tutorialMensajes: [
+      '¡Bienvenid@ al Tejo del Berriondo!\nYo soy Burrito, tu guía.\n¿Cómo te llamas?',
+      'Bienvenid@ {nombre},\nDesliza el dedo hacia arriba\npara lanzar el tejo.\nEl ángulo controla la dirección.',
+      '¡Pégale a la MECHA ROSADA\npara que explote! 💥\nLa mecha azul está mojada\ny te quita puntos. 🔵',
+      'Acumula aciertos seguidos\npara subir de nivel.\nCada nivel es más difícil.',
+      'Si tienes suerte, el JACKPOT\nexplota y puedes ganar\npremios del restaurante. 🎰',
+      '¡Listo! Ya sabes todo.\n¡A lanzar ese tejo\nberriondo!',
+    ],
+  },
+};
+
+// Helper de perspectiva — escala un objeto según su posición Y en la cancha
+// 1.0 en la base del jugador → 0.35 al fondo (diana)
+export function perspectiveScale(y, cancha) {
+  const c = cancha || TENANT_CONFIG.cancha;
+  const t = (y - c.topY) / (c.botY - c.topY);
+  return 0.35 + 0.65 * Math.max(0, Math.min(1, t));
+}
+
 // Dimensiones base — móvil vertical
 export const GAME_WIDTH = 480;
 export const GAME_HEIGHT = 854;
@@ -48,6 +118,9 @@ export const TOTAL_NIVELES = 9;
 //   Niveles 1-3 → 1 diana buena (aprendizaje)
 //   Niveles 4-6 → 2 dianas buenas (velocidad)
 //   Niveles 7-9 → 3 dianas buenas (maestría)
+// NOTA: la cancha es un trapecio en perspectiva. Ancho jugable según y:
+//   y=160 → x 166..314 · y=200 → x 156..324 · y=250 → x 145..335 · y=320 → x 128..352
+// Toda diana debe caer dentro de esos límites o el tejo no podrá alcanzarla.
 export const NIVELES = {
   // ── Ciclo base: una diana buena ─────────────────────────────────
   1: {
@@ -59,8 +132,8 @@ export const NIVELES = {
   2: {
     aciertosParaSiguiente: 3,
     dianas: [
-      { x: GAME_WIDTH / 3, y: 180, tipo: 'buena' },
-      { x: (GAME_WIDTH / 3) * 2, y: 255, tipo: 'trampa' }
+      { x: 185, y: 180, tipo: 'buena' },
+      { x: 295, y: 250, tipo: 'trampa' }
     ],
     viento: true,
     fuerzaViento: 0.0003,
@@ -69,8 +142,8 @@ export const NIVELES = {
   3: {
     aciertosParaSiguiente: 3,
     dianas: [
-      { x: GAME_WIDTH / 3, y: 180, tipo: 'buena' },
-      { x: (GAME_WIDTH / 3) * 2, y: 250, tipo: 'trampa' }
+      { x: 190, y: 180, tipo: 'buena' },
+      { x: 290, y: 245, tipo: 'trampa' }
     ],
     viento: true,
     fuerzaViento: 0.0005,
@@ -81,9 +154,9 @@ export const NIVELES = {
   4: {
     aciertosParaSiguiente: 4,
     dianas: [
-      { x: 130, y: 180, tipo: 'buena' },
-      { x: 350, y: 200, tipo: 'buena' },
-      { x: GAME_WIDTH / 2, y: 310, tipo: 'trampa' }
+      { x: 175, y: 185, tipo: 'buena' },
+      { x: 305, y: 195, tipo: 'buena' },
+      { x: GAME_WIDTH / 2, y: 300, tipo: 'trampa' }
     ],
     viento: false,
     obstaculo: false
@@ -91,21 +164,21 @@ export const NIVELES = {
   5: {
     aciertosParaSiguiente: 4,
     dianas: [
-      { x: 160, y: 170, tipo: 'buena' },
-      { x: 320, y: 235, tipo: 'buena' },
-      { x: 160, y: 320, tipo: 'trampa' }
+      { x: 185, y: 175, tipo: 'buena' },
+      { x: 300, y: 240, tipo: 'buena' },
+      { x: 185, y: 320, tipo: 'trampa' }
     ],
     viento: true,
     fuerzaViento: 0.0004,
-    obstaculo: false
+    obstaculo: true
   },
   6: {
     aciertosParaSiguiente: 4,
     dianas: [
-      { x: 130, y: 175, tipo: 'buena' },
-      { x: 350, y: 190, tipo: 'buena' },
-      { x: GAME_WIDTH / 2, y: 175, tipo: 'trampa' },
-      { x: GAME_WIDTH / 2, y: 320, tipo: 'trampa' }
+      { x: 175, y: 180, tipo: 'buena' },
+      { x: 305, y: 190, tipo: 'buena' },
+      { x: GAME_WIDTH / 2, y: 168, tipo: 'trampa' },
+      { x: GAME_WIDTH / 2, y: 310, tipo: 'trampa' }
     ],
     viento: true,
     fuerzaViento: 0.0005,
@@ -116,35 +189,35 @@ export const NIVELES = {
   7: {
     aciertosParaSiguiente: 5,
     dianas: [
-      { x: 100, y: 180, tipo: 'buena' },
-      { x: GAME_WIDTH / 2, y: 160, tipo: 'buena' },
-      { x: 380, y: 195, tipo: 'buena' },
-      { x: GAME_WIDTH / 2, y: 315, tipo: 'trampa' }
+      { x: 172, y: 178, tipo: 'buena' },
+      { x: GAME_WIDTH / 2, y: 162, tipo: 'buena' },
+      { x: 308, y: 185, tipo: 'buena' },
+      { x: GAME_WIDTH / 2, y: 305, tipo: 'trampa' }
     ],
     viento: false,
-    obstaculo: false
+    obstaculo: true
   },
   8: {
     aciertosParaSiguiente: 5,
     dianas: [
-      { x: 110, y: 165, tipo: 'buena' },
-      { x: GAME_WIDTH / 2, y: 190, tipo: 'buena' },
-      { x: 370, y: 165, tipo: 'buena' },
-      { x: 175, y: 310, tipo: 'trampa' },
-      { x: 305, y: 310, tipo: 'trampa' }
+      { x: 176, y: 168, tipo: 'buena' },
+      { x: GAME_WIDTH / 2, y: 195, tipo: 'buena' },
+      { x: 304, y: 168, tipo: 'buena' },
+      { x: 190, y: 300, tipo: 'trampa' },
+      { x: 290, y: 300, tipo: 'trampa' }
     ],
     viento: true,
     fuerzaViento: 0.0006,
-    obstaculo: false
+    obstaculo: true
   },
   9: {
     aciertosParaSiguiente: 5,
     dianas: [
-      { x: 120, y: 165, tipo: 'buena' },
-      { x: GAME_WIDTH / 2, y: 190, tipo: 'buena' },
-      { x: 360, y: 165, tipo: 'buena' },
-      { x: 180, y: 315, tipo: 'trampa' },
-      { x: 300, y: 315, tipo: 'trampa' }
+      { x: 180, y: 168, tipo: 'buena' },
+      { x: GAME_WIDTH / 2, y: 195, tipo: 'buena' },
+      { x: 300, y: 168, tipo: 'buena' },
+      { x: 192, y: 312, tipo: 'trampa' },
+      { x: 288, y: 312, tipo: 'trampa' }
     ],
     viento: true,
     fuerzaViento: 0.0008,
